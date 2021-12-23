@@ -25,8 +25,8 @@ const homeController = (_req, res) => {
 
 /**
  * Find ticket by ID
- * @param {*} req
- * @param {*} res
+ * @param {Object} req
+ * @param {Object} res
  * @param {fn} next
  * @returns {Object} ticket get by id
  */
@@ -43,8 +43,9 @@ const findByIdController = (req, res, next) => {
 
 /**
  * Find ticket by username
- * @param {*} req
- * @param {*} res
+ * @param {Object} req
+ * @param {Object} res
+ * @param {fn} next
  * @returns {Object} ticket get by username
  */
 const findByUsernameController = (req, res, next) => {
@@ -63,7 +64,61 @@ const findByUsernameController = (req, res, next) => {
 };
 
 /**
- *
+ * Update ticket username and price by TicketId
+ * @param {Object} req
+ * @param {Object} res
+ * @param {fn} next
+ * @returns success message if success
+ */
+const updateByIdController = (req, res, next) => {
+  const { ticketId } = req.params;
+  const { username, price } = req.body;
+
+  const updatedTicket = ticketDB.updateOneById(ticketId, username, price);
+  if (!updatedTicket) {
+    return next(
+      customError('Ticket Could not update, please check Ticket id', '404')
+    );
+  } else {
+    const ticketUpdatedById = ticketDB.findOneById(ticketId);
+    res.status(200).json({
+      message: 'Ticket Updated Successfully!',
+      updatedTicket: ticketUpdatedById,
+    });
+  }
+};
+
+/**
+ * Bulk Ticket Update by username
+ * @param {Object} req
+ * @param {Object} res
+ * @param {fn} next
+ * @returns
+ */
+const bulkUpdateByUsernameController = (req, res, next) => {
+  const { username } = req.params;
+  const { newusername, price } = req.body;
+
+  const checkUserExists = ticketDB.findByUsername(username);
+  if (!checkUserExists) {
+    return next(customError('Ticket not found, please check', '404'));
+  }
+  const bulkUpdated = ticketDB.bulkUpdate(username, newusername, price);
+
+  if (!bulkUpdated) {
+    return next(
+      customError(`Ticket Could not updated with the username give ${username}`)
+    );
+  } else {
+    const ticketByUserName = ticketDB.findByUsername(newusername);
+    res.status(200).json({
+      message: 'Ticket Updated Successfully',
+      UpdatedTicket: ticketByUserName,
+    });
+  }
+};
+/**
+ * Get Winner by Raffel Draw
  * @param {Object} req
  * @param {Object} res
  * @param {fn} next
@@ -78,45 +133,11 @@ const getWinnerByRaffelDraw = (req, res, next) => {
     res.status(200).json({ Winners: winner });
   }
 };
-
-/**
- * Update ticket username and price by TicketId
- * @param {*} req
- * @param {*} res
- * @param {*} next
- * @returns success message if success
- */
-const updateByIdController = (req, res, next) => {
-  const { ticketId, username, price } = req.params;
-
-  const updatedTicket = ticketDB.updateOneById(ticketId, username, price);
-  if (!updatedTicket) {
-    return next(
-      customError('Ticket Could not update, please check Ticket id', '404')
-    );
-  } else {
-    res.status(200).json({ message: 'Ticket Updated Successfully!' });
-  }
-};
-
-const bulkUpdateByUsernameController = (req, res, next) => {
-  const { username } = req.params;
-  const { newusername, price } = req.body;
-  console.log(username, newusername, price);
-  const bulkUpdated = ticketDB.bulkUpdate(username, newusername, price);
-  if (!bulkUpdated) {
-    return next(
-      customError(`Ticket Could not updated with the username give ${username}`)
-    );
-  } else {
-    res.status(200).json({ message: 'Ticket Updated Successfully' });
-  }
-};
 module.exports = {
   homeController,
   findByIdController,
   findByUsernameController,
-  getWinnerByRaffelDraw,
   updateByIdController,
   bulkUpdateByUsernameController,
+  getWinnerByRaffelDraw,
 };
