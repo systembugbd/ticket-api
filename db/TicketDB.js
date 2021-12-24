@@ -30,7 +30,7 @@ class TicketDB {
    * Create Bulk Ticket
    * @param {string} username
    * @param {number} price
-   * @param {number} count
+   * @param {number} count number of ticket
    */
   bulkCreate(username, price, count) {
     let ticket;

@@ -10,6 +10,7 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     message: 'API Health is good',
